@@ -12,16 +12,7 @@ namespace YMM4PluginPortal.ViewModel
 {
     internal class PluginViewModel : INotifyPropertyChanged
     {
-        private ObservableCollection<Plugin> _plugins;
-        public ObservableCollection<Plugin> Plugins
-        {
-            get { return _plugins; }
-            set
-            {
-                _plugins = value;
-                OnPropertyChanged(nameof(Plugins));
-            }
-        }
+        public ObservableCollection<Plugin> Plugins { get; set; }
 
         public PluginViewModel()
         {
@@ -49,6 +40,8 @@ namespace YMM4PluginPortal.ViewModel
                         if (!string.IsNullOrEmpty(plugin.Id) && localVersions.TryGetValue(plugin.Id, out string? localVer))
                         {
                             plugin.LocalVersion = localVer;
+                            plugin.IsDownloaded = true;
+                            plugin.IsUpdateAvailable = IsNewerVersionAvailable(plugin.Version, localVer);
                         }
                         else
                         {
@@ -72,6 +65,23 @@ namespace YMM4PluginPortal.ViewModel
                 MessageBox.Show($"データの取得に失敗しました: {ex.Message}");
             }
 
+        }
+
+        private bool IsNewerVersionAvailable(string? serverVersionStr, string? localVersionStr)
+        {
+            if (string.IsNullOrEmpty(serverVersionStr) || string.IsNullOrEmpty(localVersionStr))
+            {
+                return false;
+            }
+
+            // "1.0.0"のような形式を正しく比較するためにSystem.Versionクラスを使う
+            if (Version.TryParse(serverVersionStr, out var serverVersion) &&
+                Version.TryParse(localVersionStr, out var localVersion))
+            {
+                return serverVersion > localVersion;
+            }
+
+            return false;
         }
 
         private Dictionary<string, string> GetLocalPluginVersions()
@@ -108,7 +118,7 @@ namespace YMM4PluginPortal.ViewModel
                         if (fileName != null && !versions.ContainsKey(fileName))
                         {
                             versions.Add(fileName, version);
-                            Debug.WriteLine($"Found local plugin: {fileName}, Version: {version} DirPath: {dllPath}");
+                            //Debug.WriteLine($"Found local plugin: {fileName}, Version: {version} DirPath: {dllPath}");
                         }
                     }
                     catch (BadImageFormatException) { /* .NETアセンブリでないDLLは無視 */ }

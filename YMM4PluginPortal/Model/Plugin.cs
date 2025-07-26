@@ -16,7 +16,6 @@ namespace YMM4PluginPortal.Model
         private string _topics;
         private List<string> _keywords;
         private List<string> _category;
-        private string _localVersion;
 
         [JsonPropertyName("id")]
         public string Id { get => _id; set => SetField(ref _id, value); }
@@ -45,7 +44,51 @@ namespace YMM4PluginPortal.Model
         [JsonPropertyName("category")]
         public List<string> Category { get => _category; set => SetField(ref _category, value); }
 
-        public string LocalVersion { get => _localVersion; set => SetField(ref _localVersion, value); }
+        /// <summary>
+        /// ローカルにインストールされているバージョン。
+        /// INotifyPropertyChangedを実装しているのは良い習慣です。
+        /// </summary>
+        private string? _localVersion;
+        public string? LocalVersion
+        {
+            get => _localVersion;
+            set
+            {
+                _localVersion = value;
+                OnPropertyChanged(nameof(LocalVersion));
+            }
+        }
+
+        /// <summary>
+        /// ダウンロード済み（インストール済み）かどうかを示します。
+        /// </summary>
+        private bool _isDownloaded;
+        [JsonIgnore] // このプロパティはJSONには含めない
+        public bool IsDownloaded
+        {
+            get => _isDownloaded;
+            set
+            {
+                _isDownloaded = value;
+                OnPropertyChanged(nameof(IsDownloaded));
+            }
+        }
+
+        /// <summary>
+        /// 新しいバージョンが利用可能かどうかを示します。
+        /// </summary>
+        private bool _isUpdateAvailable;
+        [JsonIgnore] // このプロパティはJSONには含めない
+        public bool IsUpdateAvailable
+        {
+            get => _isUpdateAvailable;
+            set
+            {
+                _isUpdateAvailable = value;
+                OnPropertyChanged(nameof(IsUpdateAvailable));
+            }
+        }
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)

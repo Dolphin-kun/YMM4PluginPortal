@@ -11,28 +11,135 @@
         <vm:PluginViewModel/>
     </UserControl.DataContext>
 
-    <Grid Margin="10">
-        <ListView ItemsSource="{Binding Plugins}" AlternationCount="2">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Style.Triggers>
-                        <Trigger Property="ItemsControl.AlternationIndex" Value="1">
-                            <Setter Property="Background" Value="#F0F0F0"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="プラグイン名" Width="200" DisplayMemberBinding="{Binding Title}" />
-                    <GridViewColumn Header="作者" Width="150" DisplayMemberBinding="{Binding Author}" />
-                    <GridViewColumn Header="バージョン" Width="80" DisplayMemberBinding="{Binding Version}" />
-                    <GridViewColumn Header="ローカルVer." Width="100" DisplayMemberBinding="{Binding LocalVersion}" />
-                    <GridViewColumn Header="作成日" Width="160" DisplayMemberBinding="{Binding CreatedAt}"/>
-                    <GridViewColumn Header="説明" Width="350" DisplayMemberBinding="{Binding Description}" />
-                    <GridViewColumn Header="カテゴリ" Width="120" DisplayMemberBinding="{Binding Category[0]}" />
-                </GridView>
-            </ListView.View>
-        </ListView>
-    </Grid>
+    <ListView ItemsSource="{Binding Plugins}" BorderThickness="0"
+              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+        <ListView.Resources>
+            <Style x:Key="CardBorderStyle" TargetType="Border">
+                <Setter Property="Width" Value="240" />
+                <Setter Property="Margin" Value="10" />
+                <Setter Property="Padding" Value="15" />
+                <Setter Property="Background" Value="White" />
+                <Setter Property="BorderBrush" Value="#E0E0E0" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="5" />
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect ShadowDepth="1" Color="#CCCCCC" Opacity="0.5" BlurRadius="4"/>
+                    </Setter.Value>
+                </Setter>
+
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsDownloaded}" Value="True" />
+                            <Condition Binding="{Binding IsUpdateAvailable}" Value="False" />
+                        </MultiDataTrigger.Conditions>
+                        <MultiDataTrigger.Setters>
+                            <Setter Property="Background" Value="#F5F5F5"/>
+                            <Setter Property="BorderBrush" Value="#42A5F5" />
+                            <Setter Property="BorderThickness" Value="2" />
+                        </MultiDataTrigger.Setters>
+                    </MultiDataTrigger>
+
+                    <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
+                        <Setter Property="BorderBrush" Value="#FFB74D" />
+                        <Setter Property="BorderThickness" Value="2" />
+                    </DataTrigger>
+
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="UpdateBadgeStyle" TargetType="Border">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="InstalledBadgeStyle" TargetType="Border">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsDownloaded}" Value="True" />
+                            <Condition Binding="{Binding IsUpdateAvailable}" Value="False" />
+                        </MultiDataTrigger.Conditions>
+                        <MultiDataTrigger.Setters>
+                            <Setter Property="Visibility" Value="Visible" />
+                        </MultiDataTrigger.Setters>
+                    </MultiDataTrigger>
+                </Style.Triggers>
+            </Style>
+
+        </ListView.Resources>
+
+        <ListView.ItemContainerStyle>
+            <Style TargetType="ListViewItem">
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListViewItem">
+                            <ContentPresenter />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ListView.ItemContainerStyle>
+
+        <ListView.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel Margin="5"/>
+            </ItemsPanelTemplate>
+        </ListView.ItemsPanel>
+
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <Border Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{Binding Title}" FontWeight="Bold" FontSize="16" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+
+                            <Grid Grid.Column="1" Margin="5,0,0,0">
+                                <Border Style="{StaticResource UpdateBadgeStyle}" 
+                                        Background="#FFB74D" CornerRadius="10" Padding="8,3">
+                                    <TextBlock Text="アップデート" FontSize="10" Foreground="White" FontWeight="Bold"/>
+                                </Border>
+                                <Border Style="{StaticResource InstalledBadgeStyle}" 
+                                        Background="#42A5F5" CornerRadius="10" Padding="8,3">
+                                    <TextBlock Text="インストール済み" FontSize="10" Foreground="White" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock Text="{Binding Author}" Foreground="Gray" FontSize="12"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                            <TextBlock Text="Ver: " Foreground="Gray" FontSize="12"/>
+                            <TextBlock Text="{Binding Version}" Foreground="Gray" FontSize="12"/>
+                            <TextBlock Text=" (Local: " Foreground="Gray" FontSize="12" Margin="5,0,0,0"/>
+                            <TextBlock Text="{Binding LocalVersion}" Foreground="Gray" FontSize="12"/>
+                            <TextBlock Text=")" Foreground="Gray" FontSize="12"/>
+                        </StackPanel>
+
+                        <Separator Margin="0,10,0,10"/>
+
+                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Height="60" TextTrimming="CharacterEllipsis" Foreground="#555555"/>
+
+                        <Border Background="#E0E0E0" CornerRadius="10" Padding="8,3" HorizontalAlignment="Left" Margin="0,10,0,0">
+                            <TextBlock Text="{Binding Category[0]}" FontSize="11" Foreground="#333333"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
 </UserControl>
