@@ -7,15 +7,15 @@ namespace YMM4PluginPortal.Model
 {
     public class Plugin : INotifyPropertyChanged
     {
-        private string _id;
-        private string _title;
-        private string _description;
-        private string _author;
-        private string _createdAt;
-        private string _version;
-        private string _topics;
-        private List<string> _keywords;
-        private List<string> _category;
+        private string _id = string.Empty;
+        private string _title = string.Empty;
+        private string _description = string.Empty;
+        private string _author = string.Empty;
+        private string _createdAt = string.Empty;
+        private string _version = string.Empty;
+        private string _topics = string.Empty;
+        private List<string> _keywords = [];
+        private List<string> _category = [];
 
         [JsonPropertyName("id")]
         public string Id { get => _id; set => SetField(ref _id, value); }
@@ -44,10 +44,6 @@ namespace YMM4PluginPortal.Model
         [JsonPropertyName("category")]
         public List<string> Category { get => _category; set => SetField(ref _category, value); }
 
-        /// <summary>
-        /// ローカルにインストールされているバージョン。
-        /// INotifyPropertyChangedを実装しているのは良い習慣です。
-        /// </summary>
         private string? _localVersion;
         public string? LocalVersion
         {
@@ -59,11 +55,8 @@ namespace YMM4PluginPortal.Model
             }
         }
 
-        /// <summary>
-        /// ダウンロード済み（インストール済み）かどうかを示します。
-        /// </summary>
         private bool _isDownloaded;
-        [JsonIgnore] // このプロパティはJSONには含めない
+        [JsonIgnore]
         public bool IsDownloaded
         {
             get => _isDownloaded;
@@ -74,11 +67,8 @@ namespace YMM4PluginPortal.Model
             }
         }
 
-        /// <summary>
-        /// 新しいバージョンが利用可能かどうかを示します。
-        /// </summary>
         private bool _isUpdateAvailable;
-        [JsonIgnore] // このプロパティはJSONには含めない
+        [JsonIgnore]
         public bool IsUpdateAvailable
         {
             get => _isUpdateAvailable;

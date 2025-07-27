@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Text.Json;
 using System.Windows;
 using YMM4PluginPortal.Model;
+using YukkuriMovieMaker.Plugin;
 
 namespace YMM4PluginPortal.ViewModel
 {
@@ -67,14 +66,13 @@ namespace YMM4PluginPortal.ViewModel
 
         }
 
-        private bool IsNewerVersionAvailable(string? serverVersionStr, string? localVersionStr)
+        private static bool IsNewerVersionAvailable(string? serverVersionStr, string? localVersionStr)
         {
             if (string.IsNullOrEmpty(serverVersionStr) || string.IsNullOrEmpty(localVersionStr))
             {
                 return false;
             }
 
-            // "1.0.0"のような形式を正しく比較するためにSystem.Versionクラスを使う
             if (Version.TryParse(serverVersionStr, out var serverVersion) &&
                 Version.TryParse(localVersionStr, out var localVersion))
             {
@@ -84,75 +82,31 @@ namespace YMM4PluginPortal.ViewModel
             return false;
         }
 
-        private Dictionary<string, string> GetLocalPluginVersions()
+        private static Dictionary<string, string> GetLocalPluginVersions()
         {
             var versions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             try
             {
-                string? portalPluginPath = Assembly.GetExecutingAssembly().Location;
-                if (string.IsNullOrEmpty(portalPluginPath)) return versions;
-
-                string? portalPluginDir = Path.GetDirectoryName(portalPluginPath);
-                if (string.IsNullOrEmpty(portalPluginDir)) return versions;
-
-                string? allPluginsDir = Path.GetDirectoryName(portalPluginDir);
-                if (string.IsNullOrEmpty(allPluginsDir) || !Directory.Exists(allPluginsDir))
+                foreach (var assembly in PluginAssemblyLoader.Assemblies)
                 {
-                    Debug.WriteLine($"Plugin directory not found: {allPluginsDir}");
-                    return versions;
+                    var assemblyName = assembly.GetName();
+                    var name = assemblyName.Name;
+                    var version = assemblyName.Version?.ToString() ?? "N/A";
 
-                }
-
-
-                var dllFiles = new List<string>();
-                GetAllDllFilesRecursive(allPluginsDir, dllFiles);
-
-                foreach (var dllPath in dllFiles)
-                {
-                    try
+                    if (name != null && !versions.ContainsKey(name))
                     {
-                        var assemblyName = AssemblyName.GetAssemblyName(dllPath);
-                        var version = assemblyName.Version?.ToString() ?? "N/A";
-                        var fileName = Path.GetFileNameWithoutExtension(dllPath);
-
-                        if (fileName != null && !versions.ContainsKey(fileName))
-                        {
-                            versions.Add(fileName, version);
-                            //Debug.WriteLine($"Found local plugin: {fileName}, Version: {version} DirPath: {dllPath}");
-                        }
+                        versions.Add(name, version);
+                        Debug.WriteLine($"Name: {name}, Version: {version}");
                     }
-                    catch (BadImageFormatException) { /* .NETアセンブリでないDLLは無視 */ }
-                    catch (Exception ex) { Debug.WriteLine($"Error reading version from {dllPath}: {ex.Message}"); }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"ローカルプラグインのスキャン中にエラーが発生しました: {ex.Message}");
+                MessageBox.Show($"ローカルプラグインのバージョン取得中にエラーが発生しました: {ex.Message}");
             }
             return versions;
         }
 
-        private void GetAllDllFilesRecursive(string directory, List<string> dllFiles)
-        {
-            try
-            {
-                // 現在のディレクトリにあるDLLファイルを追加
-                dllFiles.AddRange(Directory.GetFiles(directory, "*.dll"));
-
-                // 現在のディレクトリにある全てのサブディレクトリを取得
-                var subDirectories = Directory.GetDirectories(directory);
-                // 各サブディレクトリに対して、この関数自身を再度呼び出す（再帰）
-                foreach (var subDir in subDirectories)
-                {
-                    GetAllDllFilesRecursive(subDir, dllFiles);
-                }
-            }
-            catch (Exception ex)
-            {
-                // アクセス権限のないフォルダなどでエラーが発生しても処理を続ける
-                Debug.WriteLine($"Could not access directory {directory}: {ex.Message}");
-            }
-        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
