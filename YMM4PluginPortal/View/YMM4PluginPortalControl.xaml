@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:YMM4PluginPortal.View"
              xmlns:vm="clr-namespace:YMM4PluginPortal.ViewModel"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             Loaded="YMM4PluginPortalControl_Loaded">
     <UserControl.DataContext>
         <vm:PluginViewModel/>
     </UserControl.DataContext>
@@ -47,6 +48,14 @@
                         <Setter Property="BorderThickness" Value="2" />
                     </DataTrigger>
 
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect ShadowDepth="2" Color="#AAAAAA" Opacity="0.6" BlurRadius="8"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
                 </Style.Triggers>
             </Style>
 
@@ -98,6 +107,31 @@
         <ListView.ItemTemplate>
             <DataTemplate>
                 <Border Style="{StaticResource CardBorderStyle}">
+                    <Border.InputBindings>
+                        <MouseBinding Gesture="LeftClick"
+                                      Command="{Binding DataContext.OpenUrlCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                      CommandParameter="{Binding DownloadUrl}" />
+                    </Border.InputBindings>
+
+                    <Border.ContextMenu>
+                        <ContextMenu ItemsSource="{Binding SocialLinks}" Placement="Mouse">
+                            <ContextMenu.ItemContainerStyle>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="{Binding Name}" />
+
+                                    <Setter Property="Command" Value="{Binding DataContext.OpenUrlCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                    <Setter Property="CommandParameter" Value="{Binding Url}" />
+
+                                    <Setter Property="Icon">
+                                        <Setter.Value>
+                                            <Image Source="{Binding IconUrl}" Width="16" Height="16" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ContextMenu.ItemContainerStyle>
+                        </ContextMenu>
+                    </Border.ContextMenu>
+
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>

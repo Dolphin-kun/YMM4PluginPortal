@@ -14,6 +14,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Reference Include="YamlDotNet">
+		  <HintPath>$(YMM4DirPath)YamlDotNet.dll</HintPath>
+		</Reference>
 		<Reference Include="YukkuriMovieMaker">
 			<HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
 		</Reference>

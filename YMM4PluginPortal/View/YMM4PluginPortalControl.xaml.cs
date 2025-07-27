@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace YMM4PluginPortal.View
 {
@@ -10,6 +11,15 @@ namespace YMM4PluginPortal.View
         public YMM4PluginPortalControl()
         {
             InitializeComponent();
+        }
+
+        private void YMM4PluginPortalControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            var parentWindow = Window.GetWindow(this);
+            if (parentWindow is not null)
+            {
+                parentWindow.Title = "YMM4 プラグインポータル";
+            }
         }
     }
 }

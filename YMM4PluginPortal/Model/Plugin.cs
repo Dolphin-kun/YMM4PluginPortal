@@ -1,4 +1,4 @@
-﻿
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
@@ -45,47 +45,30 @@ namespace YMM4PluginPortal.Model
         public List<string> Category { get => _category; set => SetField(ref _category, value); }
 
         private string? _localVersion;
-        public string? LocalVersion
-        {
-            get => _localVersion;
-            set
-            {
-                _localVersion = value;
-                OnPropertyChanged(nameof(LocalVersion));
-            }
-        }
+        public string? LocalVersion { get => _localVersion; set => SetField(ref _localVersion, value); }
 
         private bool _isDownloaded;
         [JsonIgnore]
-        public bool IsDownloaded
-        {
-            get => _isDownloaded;
-            set
-            {
-                _isDownloaded = value;
-                OnPropertyChanged(nameof(IsDownloaded));
-            }
-        }
+        public bool IsDownloaded { get => _isDownloaded; set => SetField(ref _isDownloaded, value); }
 
         private bool _isUpdateAvailable;
         [JsonIgnore]
-        public bool IsUpdateAvailable
-        {
-            get => _isUpdateAvailable;
-            set
-            {
-                _isUpdateAvailable = value;
-                OnPropertyChanged(nameof(IsUpdateAvailable));
-            }
-        }
+        public bool IsUpdateAvailable { get => _isUpdateAvailable; set => SetField(ref _isUpdateAvailable, value); }
+
+        private string? _downloadUrl;
+        [JsonIgnore]
+        public string? DownloadUrl { get => _downloadUrl; set => SetField(ref _downloadUrl, value); }
+
+        [JsonIgnore]
+        public ObservableCollection<DisplayLink> SocialLinks { get; set; } = [];
 
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
             field = value;
